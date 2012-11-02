@@ -38,19 +38,30 @@ class RedisConnection < EventMachine::Connection
 
   def unbind
     puts "RedisConnection: connection unbound"
-    @node_id = (@node_id + 1) % @@nodes.count
-    @reconnect_count += 1
 
-    if @reconnect_count == @@reconnect_limit
-      @client.close_connection_after_writing
-    else
-      if @node_id == @last_alive_node
-        puts "RedisConnection: finished one reconnect cycle, sleeping before trying again"
-        sleep @@reconnect_delay
+    EventMachine.disable_proxy self
+
+    unless @client_unbind
+      @node_id = (@node_id + 1) % @@nodes.count
+      @reconnect_count += 1
+
+      if @reconnect_count == @@reconnect_limit
+        @client.close_connection_after_writing
+      else
+        if @node_id == @last_alive_node
+          puts "RedisConnection: finished one reconnect cycle, sleeping before trying again"
+          sleep @@reconnect_delay
+        end
+        reconnect @@nodes[@node_id][:host], @@nodes[@node_id][:port]
       end
-      reconnect @@nodes[@node_id][:host], @@nodes[@node_id][:port]
     end
   end
 
-end
+  def client_unbind
+    puts "RedisConnection: client unbind"
+    EventMachine.disable_proxy self
+    @client_unbind = true
+    close_connection
+  end
 
+end

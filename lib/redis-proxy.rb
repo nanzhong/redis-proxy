@@ -1,5 +1,6 @@
+require 'eventmachine'
 require 'redis-proxy/redis_connection'
-require 'redis-proxy/redis_proxy'
+require 'redis-proxy/redis_proxy_server'
 
 class RedisProxy
 

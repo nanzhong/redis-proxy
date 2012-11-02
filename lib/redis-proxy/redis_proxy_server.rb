@@ -19,8 +19,7 @@ class RedisProxyServer < EventMachine::Connection
 
   def unbind
     puts "RedisProxy: unbind"
-    @proxy.stop_proxying
-    @proxy.close_connection
+    @proxy.client_unbind
   end
 
 end
